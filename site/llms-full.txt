@@ -1,0 +1,196 @@
+# Tantra
+
+> Tantra is an omnichannel outreach platform for conversation-led and invitation-led campaigns. It has two campaign paths: Google Calendar campaigns for RSVP-led outreach, and sequences across Gmail, LinkedIn and WhatsApp, including social-only sequences.
+
+Gmail sequence steps and Google Calendar campaigns send through the customer's own Google Workspace service account with domain-wide delegation, so they go out from their real mailboxes rather than a shared pool.
+LinkedIn and WhatsApp steps send through the customer's own linked social accounts. Google Workspace is required only for Gmail or Calendar, so a social-only sequence needs no Workspace tenant.
+There are no channel add-ons. Pro includes up to 5 LinkedIn or WhatsApp accounts and Scale up to 15, and you can add more at $20 per additional account per month. Every plan includes unlimited email and calendar accounts.
+AI personalization is optional. Customers connect it by signing in with a ChatGPT or Claude account (no API key) or with their own OpenRouter, Cerebras or Novita key; there are no resold AI credits. It applies to email subject and body and Calendar descriptions. Templates, merge tags and spintax work without any AI provider, and social messages are template-based.
+There is deliberately no open-pixel tracking. Engagement is measured by clicks, replies and calendar RSVPs.
+Zoom and WebinarGeek attendance is refreshed on a user-triggered basis for follow-up attribution.
+Pricing is per company rather than per inbox or per seat.
+
+## Key pages
+
+- [Home](https://usetantra.com/): Product overview and how the two campaign paths fit together
+- [Features](https://usetantra.com/features): Full capability list for omnichannel sequences and Calendar campaigns
+- [Pricing](https://usetantra.com/pricing): Plans, what is never metered, and billing FAQ
+- [Integrations](https://usetantra.com/integrations): Google Workspace, LinkedIn, WhatsApp, Zoom, WebinarGeek, LLM providers, MCP, webhooks, REST API
+- [Omnichannel Sequences](https://usetantra.com/features/sequences): Multi-step sequences mixing Gmail, LinkedIn and WhatsApp steps
+- [Unified Inbox](https://usetantra.com/features/unified-inbox): Email and social replies in one threaded queue
+- [Deliverability](https://usetantra.com/features/deliverability): Sending caps, address validation, suppression, and mailbox warmup
+- [AI Personalization](https://usetantra.com/features/ai): Optional personalization for email subject and body and Calendar descriptions, through a ChatGPT or Claude sign-in or a customer-provided API key
+- [Developer Platform](https://usetantra.com/features/developers): Outbound webhooks, REST API with account-level keys, and the MCP server
+- [Calendar Campaigns](https://usetantra.com/features/calendar-campaigns): Google Calendar invitation campaigns measured by RSVP
+- [Use Cases](https://usetantra.com/use-cases): Index of the jobs Tantra is hired for, with the channels and prerequisites each one needs
+- [Cold Email](https://usetantra.com/use-cases/cold-email): Multi-step Gmail sequences sent as your own Workspace mailboxes
+- [LinkedIn Outreach](https://usetantra.com/use-cases/linkedin-outreach): Profile visits, connection requests and messages paced per account
+- [WhatsApp Campaigns](https://usetantra.com/use-cases/whatsapp-campaigns): Plain-text WhatsApp outreach from a linked account
+- [Webinars](https://usetantra.com/use-cases/webinars): Webinar registration outreach, with Zoom and WebinarGeek attendance attributed back to campaigns
+- [Help Center](https://usetantra.com/help): Task-oriented documentation, organized by topic
+- [Blog](https://usetantra.com/blog): Long-form guides on deliverability and outreach strategy
+- [Contact](https://usetantra.com/contact-us): Demo requests, sales and support
+
+## Documentation
+
+### Getting Started
+
+What Tantra is, which outreach channels you can use, and how to run your first campaign.
+
+- [Calendar campaigns vs cold email](https://usetantra.com/help/getting-started/calendar-vs-cold-email): Compare Tantra's two outreach engines. Calendar campaigns send Google invitations and track RSVPs. Cold email sends multi-step sequences.
+- [Manage your account and sign-in](https://usetantra.com/help/getting-started/manage-your-account): Open your account profile, update your details and security settings, and sign in or out of Tantra.
+- [Quick start, from sign up to first send](https://usetantra.com/help/getting-started/quick-start): Set up Tantra, connect the accounts you need, load contacts, and launch your first calendar or multichannel outreach campaign.
+- [What is Tantra](https://usetantra.com/help/getting-started/what-is-tantra): Tantra helps teams run calendar, email, LinkedIn, and WhatsApp outreach from one place.
+
+### Connect Google Workspace
+
+Set up the Google service account and domain-wide delegation that lets Tantra send as your mailboxes.
+
+- [Add and verify your senders](https://usetantra.com/help/connect-google-workspace/verify-your-senders): Paste the mailboxes you want to send from and verify them against your uploaded service accounts using domain-wide delegation.
+- [Add email signatures to your senders](https://usetantra.com/help/connect-google-workspace/add-sender-signatures): Create a per-mailbox email signature with merge fields, preview it against a sample contact, and control when it is appended to outgoing email.
+- [Create a Google service account](https://usetantra.com/help/connect-google-workspace/create-a-service-account): Create a Google Cloud service account, enable the Gmail and Calendar APIs, and download the JSON key that Tantra uses to send as your mailboxes.
+- [Grant domain-wide delegation and scopes](https://usetantra.com/help/connect-google-workspace/grant-domain-wide-delegation): Authorize your Tantra service account in the Google Admin console with the exact OAuth scopes needed to send email and calendar invites.
+- [How Tantra sends as your mailboxes](https://usetantra.com/help/connect-google-workspace/how-sending-works): Tantra sends from your own Google Workspace mailboxes using a service account and domain-wide delegation, without ever holding your passwords.
+- [Reconnect a disconnected sender](https://usetantra.com/help/connect-google-workspace/reconnect-a-disconnected-sender): Steps to bring a disconnected sender back online, from checking delegation and scopes to re-authenticating all senders at once.
+- [Sender connection states explained](https://usetantra.com/help/connect-google-workspace/sender-connection-states): Understand the Connected, Disconnected, Gmail capable, and Calendar-only states Tantra shows for each sender mailbox.
+- [Upload your service account to Tantra](https://usetantra.com/help/connect-google-workspace/upload-your-service-account): Upload your service account JSON files to Tantra, tag them, and manage them. Files are encrypted at rest and can be soft-deleted.
+
+### Calendar Campaigns
+
+Reach prospects with Google Calendar invitations and track their RSVPs.
+
+- [Calendar campaign statuses explained](https://usetantra.com/help/calendar-campaigns/campaign-statuses): Understand every calendar campaign status in Tantra, from draft to completed, and why a campaign stays active for days.
+- [Create a smart calendar campaign](https://usetantra.com/help/calendar-campaigns/create-a-smart-calendar-campaign): Create a Google Calendar invitation campaign in Tantra with the five step wizard. Set the audience, senders, event details, and launch.
+- [How invitations are batched and sent](https://usetantra.com/help/calendar-campaigns/how-invites-are-sent): Tantra sends calendar invitations in batches over several days. Learn how batching works and why a campaign takes time to finish.
+- [Personalize your calendar invitations with AI](https://usetantra.com/help/calendar-campaigns/personalized-calendar-events): Personalize each calendar invitation with merge tags and optional AI. Learn how Tantra tailors the invite from each prospect's website.
+- [Schedule, start, and pause a campaign](https://usetantra.com/help/calendar-campaigns/schedule-start-and-pause): Control when a Tantra calendar campaign runs. Schedule a future start, start it now, or pause and resume sending at any time.
+- [Track RSVPs and campaign results](https://usetantra.com/help/calendar-campaigns/track-rsvps): See who accepted, declined, or has not answered your calendar invitations. Learn where RSVP counts appear and how often they refresh.
+- [What are calendar campaigns](https://usetantra.com/help/calendar-campaigns/what-are-calendar-campaigns): Calendar campaigns reach prospects with Google Calendar invitations and track their RSVPs. Learn how the engine works and when to use it.
+
+### Cold Email
+
+Build multi-step email sequences that send from your mailboxes with per-sender limits.
+
+- [Build an email sequence](https://usetantra.com/help/cold-email/build-an-email-sequence): Use Tantra's six-step wizard to build a cold email sequence, pick senders and audience, set limits, and launch or schedule your campaign.
+- [Enrollment lifecycle and statuses](https://usetantra.com/help/cold-email/enrollment-lifecycle): Understand how a contact moves through a Tantra cold email sequence, what each enrollment status means, and how to manage enrollments.
+- [Sending windows and daily limits](https://usetantra.com/help/cold-email/sending-windows-and-limits): Control when Tantra sends cold email with a sending window, and cap volume per mailbox with enforced daily and hourly limits.
+- [Sequence steps, delays, and personalization modes](https://usetantra.com/help/cold-email/sequence-steps-and-timing): Configure cold email steps in Tantra, set delays between them, choose template or AI personalization, and control reply threading.
+- [Understand your email analytics](https://usetantra.com/help/cold-email/understand-your-email-analytics): Read the Email Analytics dashboard in Tantra. Learn what sent, clicked, replied, bounced, and unsubscribed mean and how fresh each number is.
+- [Warm up your sending mailboxes](https://usetantra.com/help/cold-email/warmup-your-mailboxes): Warm up new Gmail mailboxes in Tantra with a gradual peer-to-peer ramp that builds sending reputation before you run cold email at volume.
+- [What is cold email outreach](https://usetantra.com/help/cold-email/what-is-cold-email-outreach): Learn how Tantra sends multi-step cold email sequences from your own Gmail mailboxes, with per-sender limits, reply detection, and click tracking.
+
+### Multichannel Outreach
+
+Connect LinkedIn and WhatsApp, then add those channels to your outreach sequences.
+
+- [Build a multichannel outreach sequence](https://usetantra.com/help/multichannel-outreach/build-a-multichannel-sequence): Combine email, LinkedIn, and WhatsApp steps in one Tantra outreach sequence.
+- [Connect and manage LinkedIn](https://usetantra.com/help/multichannel-outreach/connect-and-manage-linkedin): Connect LinkedIn, complete verification, set activity limits, reconnect an account, or remove it from Tantra.
+- [Connect and manage WhatsApp](https://usetantra.com/help/multichannel-outreach/connect-and-manage-whatsapp): Link WhatsApp by QR code, understand account status, adjust message limits, reconnect, or remove the account.
+- [LinkedIn and WhatsApp accounts on your plan](https://usetantra.com/help/multichannel-outreach/activate-and-manage-channel-add-ons): How many LinkedIn and WhatsApp accounts each Tantra plan includes, how to add more, and where to manage them.
+
+### Inbox and Replies
+
+Read replies across your outreach channels and keep conversations organized.
+
+- [Manage leads, stages, and scores](https://usetantra.com/help/inbox-and-replies/manage-leads): Track prospects in Tantra's leads view, set stages, read the automatic engagement score, and open a lead's activity, notes, and campaigns.
+- [Reply detection and intent classification](https://usetantra.com/help/inbox-and-replies/reply-detection): Learn how Tantra polls your mailboxes to detect replies, links them to the right campaign, and classifies each one with AI and a keyword fallback.
+- [Reply intents explained](https://usetantra.com/help/inbox-and-replies/reply-intents): Understand the reply intents Tantra assigns, from interested to unsubscribe request, and how they map to the tone badges in your inbox.
+- [Use the unified inbox](https://usetantra.com/help/inbox-and-replies/use-the-inbox): Read and filter email, LinkedIn, and WhatsApp conversations in one inbox and view every conversation with the same person.
+
+### Contacts and Lists
+
+Import, organize, validate, and suppress contacts across your campaigns.
+
+- [Contact validation and quarantine](https://usetantra.com/help/contacts/contact-validation): See how Tantra checks email syntax, role addresses, and MX records before a cold email campaign sends, and why some contacts are quarantined.
+- [Import contacts from CSV](https://usetantra.com/help/contacts/import-contacts): Upload a CSV, map its columns to Tantra fields, name a new list, and import up to 50,000 contacts in one file.
+- [Manage contacts and lists](https://usetantra.com/help/contacts/manage-contacts-and-lists): Add, filter, and delete contacts, organize them into lists, and use lists to target your calendar and cold email campaigns.
+- [Suppression lists and unsubscribes](https://usetantra.com/help/contacts/suppression-and-unsubscribes): Block emails, domains, TLDs, and role mailboxes so Tantra never sends to them, and see how unsubscribes and bounces are suppressed automatically.
+
+### Templates and AI
+
+Reusable templates, merge tags, spintax, AI personalization, and connecting your own LLM.
+
+- [AI personalization for email and calendar](https://usetantra.com/help/templates-and-ai/ai-personalization): Tantra rewrites your email and calendar copy per recipient using their website. Turn it on per step or campaign, with template fallback.
+- [Connect your own LLM provider](https://usetantra.com/help/templates-and-ai/connect-an-llm-provider): Bring your own Cerebras, OpenRouter, or Novita key to Tantra, test the connection, pick a model, and set the default used for AI personalization.
+- [Create and manage templates](https://usetantra.com/help/templates-and-ai/create-and-manage-templates): Build reusable email and calendar templates in Tantra, insert merge fields, and use built-in AI to generate or improve copy.
+- [How website scraping feeds personalization](https://usetantra.com/help/templates-and-ai/website-scraping): Tantra reads a text snapshot of each contact's public website to personalize outreach. See how targets are chosen and when it is skipped.
+- [Merge tags and spintax](https://usetantra.com/help/templates-and-ai/merge-tags-and-spintax): Personalize outreach in Tantra with merge tags like firstName and company, and add spintax variants that stay stable per recipient.
+
+### Deliverability and Tracking
+
+Click tracking, custom domains, one-click unsubscribe, domain health, and why opens are not tracked.
+
+- [Domain health reports (SPF, DKIM, DMARC)](https://usetantra.com/help/deliverability-and-tracking/domain-health-reports): Understand how Tantra scans your sender domains daily for SPF, DKIM, DMARC, and blocklist problems, and how to read the health status and score.
+- [How click tracking works](https://usetantra.com/help/deliverability-and-tracking/click-tracking): Learn how Tantra rewrites links, verifies signed click tokens, filters bot clicks, and shows unique click engagement in analytics.
+- [One-click unsubscribe](https://usetantra.com/help/deliverability-and-tracking/one-click-unsubscribe): See how Tantra adds RFC 8058 one-click unsubscribe headers and a public confirmation page so recipients can opt out and land on your suppression list.
+- [Set up a custom tracking domain](https://usetantra.com/help/deliverability-and-tracking/custom-tracking-domains): Add a CNAME subdomain, verify it, and set it as your default so tracked email links carry your own branding instead of the shared domain.
+- [Set up SPF, DKIM, and DMARC](https://usetantra.com/help/deliverability-and-tracking/set-up-spf-dkim-dmarc): Authenticate your sending domain with SPF, DKIM, and DMARC so cold email from your Google Workspace mailboxes reaches the inbox.
+- [Why Tantra does not track email opens](https://usetantra.com/help/deliverability-and-tracking/why-tantra-does-not-track-opens): Tantra deliberately does not use open tracking pixels. Learn why, and how clicks, replies, and unsubscribes give you honest engagement signals.
+
+### Integrations
+
+Connect Google Calendar accounts, WebinarGeek, and Google OAuth client credentials.
+
+- [Add Google OAuth client credentials](https://usetantra.com/help/integrations/google-oauth-credentials): Store your own Google OAuth Client ID and Client Secret so Tantra can connect Google Calendar accounts for you.
+- [Connect Google Calendar accounts](https://usetantra.com/help/integrations/connect-google-calendar-accounts): Review your calendar sender accounts on the Manage Google Calendars page, set per-account options, and disconnect accounts you no longer use.
+- [Sync webinars with WebinarGeek](https://usetantra.com/help/integrations/webinargeek-integration): Connect your WebinarGeek API key, sync broadcasts and subscribers, and feed RSVP data into your calendar campaigns and reports.
+- [Sync webinars with Zoom](https://usetantra.com/help/integrations/zoom-integration): Connect a Zoom Server-to-Server OAuth app, sync webinars and registrants, register contacts who RSVP, and see which invites turned into attendance.
+
+### API, MCP, and Webhooks
+
+Issue API keys, connect the Tantra MCP server to Claude or Cursor, and receive outbound webhooks.
+
+- [Connect the Tantra MCP server](https://usetantra.com/help/api-and-mcp/mcp-server): Install the Tantra MCP server, give it your API key, and use Tantra campaigns, contacts, and templates as tools inside Claude or Cursor.
+- [Create and manage API keys](https://usetantra.com/help/api-and-mcp/api-keys): Create a Tantra API key, copy it once at creation, use it in the X-API-Key header, and revoke keys you no longer need.
+- [Receive outbound webhooks](https://usetantra.com/help/api-and-mcp/outbound-webhooks): Register an endpoint, select channel actions, inspect payloads, and understand delivery retries.
+- [Webhook event triggers](https://usetantra.com/help/api-and-mcp/webhook-event-triggers): Choose calendar, email, LinkedIn, and WhatsApp campaign events for each outbound webhook.
+
+### Billing
+
+Choose a plan, manage your subscription, and see which LinkedIn and WhatsApp accounts your plan includes.
+
+- [Cancel or change your plan](https://usetantra.com/help/billing/cancel-or-change-your-plan): Move between Tantra plans, cancel at the end of your paid period, or keep a subscription that is scheduled to end.
+- [Plans, pricing, and managing your subscription](https://usetantra.com/help/billing/plans-and-billing): Compare Tantra Pro, Scale, and Enterprise, see what each plan includes, review your payment method, and download invoices.
+
+### Troubleshooting
+
+Fix the most common issues across sending, personalization, and connections.
+
+- [A sender shows as disconnected](https://usetantra.com/help/troubleshooting/sender-shows-disconnected): Fix a sender that shows as disconnected. Check domain-wide delegation, Gmail and Calendar scopes, and re-verify the mailbox against your service account.
+- [AI personalization is not working](https://usetantra.com/help/troubleshooting/personalization-not-working): Fix AI personalization when recipients get generic copy. Check that AI mode is on, the website is reachable, and an LLM provider is available.
+- [My calendar campaign is not sending invites](https://usetantra.com/help/troubleshooting/campaign-not-sending-invites): Fix a calendar campaign that is not sending invitations. Learn how daily batching, campaign status, and sender connection affect delivery.
+- [My contacts were quarantined](https://usetantra.com/help/troubleshooting/contacts-quarantined): Learn why contacts are quarantined during a cold email launch and how to fix invalid, role, or no-MX addresses so they can be enrolled.
+- [My emails are not sending](https://usetantra.com/help/troubleshooting/emails-not-sending): Fix a cold email sequence that is not sending. Check daily and hourly limits, sending windows, sender status, suppression, and enrollment state.
+
+### Glossary
+
+Plain-language definitions of the terms Tantra uses.
+
+- [Glossary of Tantra terms](https://usetantra.com/help/glossary/glossary): Plain-language definitions of the words Tantra uses across calendar campaigns, cold email, sending, and personalization.
+
+## Blog
+
+- [Beyond open rates: the outreach KPIs that actually predict revenue (2026-08-02)](https://usetantra.com/blog/outreach-kpis-beyond-open-rates): The three tier KPI framework for B2B outreach, with 2026 benchmarks and the equation that turns them into a pipeline forecast.
+- [Cold Google Calendar outreach in 2026: hard limits, warmup, and ban triggers (2026-08-02)](https://usetantra.com/blog/cold-google-calendar-outreach-2026-limits-warmup): Every hard limit for cold calendar outreach in 2026, the warmup protocol, the ban triggers, and the psychology behind a 65% accept rate.
+- [Google Workspace deliverability: the setup manual and the error codes that tell you what broke (2026-07-29)](https://usetantra.com/blog/google-workspace-deliverability-setup-manual): How to configure SPF, DKIM and DMARC on Google Workspace, warm a mailbox properly, and read the SMTP error codes that tell you what actually broke.
+- [From registration to revenue: a playbook for B2B webinar attendance (2026-07-22)](https://usetantra.com/blog/b2b-webinar-attendance-playbook): Why only half your registrants show up, what actually moves that number, and how to run the reminder, live and follow up phases.
+- [How to land in the Gmail Primary inbox during cold outreach (2026-07-15)](https://usetantra.com/blog/gmail-primary-inbox-cold-outreach-2026): Gmail makes two decisions about your email. The stop words that matter, sorted into three buckets, and the compliance trade off nobody mentions.
+- [Email open tracking is broken. Here is what to measure instead (2026-06-24)](https://usetantra.com/blog/why-we-dont-track-email-opens): Pixels now fire for privacy proxies and security scanners, not readers. Why the metric broke, what it still costs, and the three signals to read instead.
+- [Cold email marketing in 2026 with AI: how spam filters actually work (2026-06-10)](https://usetantra.com/blog/cold-email-marketing-2026-ai-spam-filters): How spam filters evaluate email in 2026, why AI written copy gets flagged, and the psychology that separates a 2% reply rate from 15%.
+
+## Legal
+
+- [Privacy Policy](https://usetantra.com/privacy-policy)
+- [Terms of Service](https://usetantra.com/terms-of-service)
+
+## Contact
+
+- Support: support@usetantra.com
+- Sales: sales@usetantra.com
+- Contact form: https://usetantra.com/contact-us
+
+## Machine-readable resources
+
+- Sitemap: https://usetantra.com/sitemap.xml
+- Robots: https://usetantra.com/robots.txt
+- Blog RSS feed: https://usetantra.com/blog/rss.xml
