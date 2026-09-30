@@ -8,6 +8,7 @@ There are no channel add-ons. Pro includes up to 5 LinkedIn or WhatsApp accounts
 AI personalization is optional. Customers connect it by signing in with a ChatGPT or Claude account (no API key) or with their own OpenRouter, Cerebras or Novita key; there are no resold AI credits. It applies to email subject and body and Calendar descriptions. Templates, merge tags and spintax work without any AI provider, and social messages are template-based.
 There is deliberately no open-pixel tracking. Engagement is measured by clicks, replies and calendar RSVPs.
 Zoom and WebinarGeek attendance is refreshed on a user-triggered basis for follow-up attribution.
+Prospects can be added to omnichannel campaigns without a CSV upload or a manual campaign start: by inbound webhook from forms, a CRM, Clay, Zapier, n8n or Make; through the REST API; or by Claude, Claude Code, ChatGPT and other MCP-compatible AI assistants through Tantra's MCP server. Each prospect enters the campaign's sequence automatically. Every prospect passes the same suppression, validation, sending-limit and sending-window checks, however it arrives.
 Pricing is per company rather than per inbox or per seat.
 
 ## Key pages
@@ -21,6 +22,7 @@ Pricing is per company rather than per inbox or per seat.
 - [Deliverability](https://usetantra.com/features/deliverability): Sending caps, address validation, suppression, and mailbox warmup
 - [AI Personalization](https://usetantra.com/features/ai): Optional personalization for email subject and body and Calendar descriptions, through a ChatGPT or Claude sign-in or a customer-provided API key
 - [Developer Platform](https://usetantra.com/features/developers): Outbound webhooks, REST API with account-level keys, and the MCP server
+- [Prospect Intake](https://usetantra.com/features/prospect-intake): Add prospects to omnichannel campaigns by webhook, REST API or AI assistant, with no CSV upload
 - [Calendar Campaigns](https://usetantra.com/features/calendar-campaigns): Google Calendar invitation campaigns measured by RSVP
 - [Use Cases](https://usetantra.com/use-cases): Index of the jobs Tantra is hired for, with the channels and prerequisites each one needs
 - [Cold Email](https://usetantra.com/use-cases/cold-email): Multi-step Gmail sequences sent as your own Workspace mailboxes
