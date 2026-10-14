@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Companion: Your RevOps Report</title>
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    --wall: #f1efe9; --card: #fffdf8; --ink: #17181c; --ink-2: #4a4c55; --line: #dcd8cd;
+    --marker: #1d4ed8; --bad: #b42318; --ok: #1f7a3a;
+    --yellow: #fbdc7a; --coral: #ffb59e; --blue: #afd3ff; --green: #aee7bd;
+    --head: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --body: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--wall); color: var(--ink); font-family: var(--body); font-size: 16.5px; line-height: 1.55; padding-bottom: 120px; }
+  ::selection { background: var(--yellow); }
+  :focus-visible { outline: 2.5px solid var(--marker); outline-offset: 3px; border-radius: 4px; }
+  h1, h2, h3 { font-family: var(--head); font-weight: 800; letter-spacing: -0.015em; line-height: 1.15; margin: 0; }
+  button { font: inherit; }
+
+  /* top bar */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; max-width: 1100px; margin: 0 auto; padding: 18px clamp(16px, 4vw, 40px) 0; }
+  .brand { font-family: var(--head); font-weight: 800; font-size: 18px; white-space: nowrap; }
+  .brand small { font-family: var(--body); font-weight: 600; font-size: 14px; color: var(--ink-2); margin-left: 8px; }
+  .live { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--ink-2); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #d92d20; box-shadow: 0 0 0 0 rgba(217, 45, 32, .5); animation: pulse 1.8s infinite; flex: none; }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(217, 45, 32, 0); } 100% { box-shadow: 0 0 0 0 rgba(217, 45, 32, 0); } }
+  @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+
+  /* segment rail */
+  .rail { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; max-width: 1100px; margin: 16px auto 0; padding: 0 clamp(16px, 4vw, 40px); }
+  .pill { border: 0; border-radius: 6px; padding: 8px 10px; text-align: left; cursor: pointer; background: #e6e2d8; color: var(--ink-2); min-width: 0; }
+  .pill b { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .pill span { display: block; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pill[disabled] { cursor: not-allowed; opacity: .55; }
+  .pill.on { background: var(--pad); color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+  .pill.done { background: color-mix(in srgb, var(--pad) 55%, var(--wall)); color: var(--ink); }
+  .pill.done b::after { content: " \2713"; }
+  .pill.todo b::after { content: " \00b7 to finish"; color: var(--bad); text-transform: none; letter-spacing: 0; }
+  @media (max-width: 760px) {
+    .rail { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+    .pill { padding: 6px 0; text-align: center; }
+    .pill span { display: none; }
+    .pill b { font-size: 12px; letter-spacing: 0; }
+    .pill.todo b::after { content: " !"; }
+  }
+
+  /* host is ahead banner */
+  .ahead { max-width: 1100px; margin: 12px auto 0; padding: 0 clamp(16px, 4vw, 40px); }
+  .ahead div { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; background: var(--ink); color: #fff; border-radius: 8px; padding: 10px 14px; font-size: 15px; font-weight: 600; }
+  .ahead button { background: var(--yellow); color: var(--ink); border: 0; border-radius: 6px; padding: 6px 12px; font-weight: 700; cursor: pointer; }
+
+  /* the card */
+  main { max-width: 1100px; margin: 0 auto; padding: 16px clamp(16px, 4vw, 40px) 0; }
+  .card { background: var(--card); border-radius: 12px; box-shadow: 0 1px 2px rgba(23, 24, 28, .06), 0 8px 28px rgba(23, 24, 28, .06); overflow: hidden; }
+  .cardHead { background: var(--pad); padding: clamp(18px, 3vw, 30px) clamp(18px, 4vw, 40px); }
+  .minute { font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 8px; }
+  .cardHead h1 { font-size: clamp(26px, 3.6vw, 38px); max-width: 26ch; }
+  .intro { max-width: 62ch; margin: 12px 0 0; font-size: 17px; }
+  .cardBody { padding: clamp(18px, 3vw, 30px) clamp(18px, 4vw, 40px) clamp(22px, 3vw, 34px); }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
+  .f { min-width: 0; grid-column: span 2; }
+  .f.half { grid-column: span 1; }
+  @media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } .f, .f.half { grid-column: span 1; } }
+  .f > label, .f > .lab { display: block; font-weight: 700; font-size: 15.5px; margin-bottom: 6px; }
+  .opt { font-weight: 500; color: var(--ink-2); font-size: 14px; }
+  .hint { display: block; color: var(--ink-2); font-size: 14px; margin: -2px 0 8px; }
+  input[type=text], input[type=email], input[type=number], textarea {
+    width: 100%; min-width: 0; font: inherit; font-size: 16px; color: var(--ink); background: #fff; border: 1.5px solid var(--line); border-radius: 8px; padding: 11px 12px;
+  }
+  textarea { min-height: 84px; resize: vertical; }
+  input:focus, textarea:focus { border-color: var(--ink); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--pad) 70%, transparent); }
+  .f.bad input, .f.bad textarea { border-color: var(--bad); }
+  .err { display: none; color: var(--bad); font-size: 14px; font-weight: 600; margin-top: 6px; }
+  .f.bad .err { display: block; }
+  .choices { display: grid; gap: 8px; }
+  .choices.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 760px) { .choices.two { grid-template-columns: minmax(0, 1fr); } .choices.inl { grid-template-columns: minmax(0, 1fr) !important; } }
+  .choice { display: flex; align-items: flex-start; gap: 10px; background: #fff; border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; cursor: pointer; font-size: 15.5px; min-width: 0; }
+  .choice input { margin: 4px 0 0; accent-color: var(--ink); flex: none; }
+  .choice:has(input:checked) { border-color: var(--ink); background: color-mix(in srgb, var(--pad) 40%, #fff); }
+  .f.bad .choice { border-color: color-mix(in srgb, var(--bad) 55%, var(--line)); }
+  .unit { position: relative; }
+  .unit i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-style: normal; color: var(--ink-2); font-weight: 600; pointer-events: none; }
+  .unit.pre i { left: 12px; right: auto; }
+  .unit.pre input { padding-left: 26px; }
+  .unit.post input { padding-right: 34px; }
+  .preview { grid-column: 1 / -1; background: var(--wall); border-left: 4px solid var(--ink); border-radius: 6px; padding: 12px 14px; font-size: 16px; }
+  .preview > b { display: block; font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); margin-bottom: 4px; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 26px; }
+  .primary { background: var(--ink); color: #fff; border: 0; border-radius: 8px; padding: 13px 22px; font-weight: 700; font-size: 16px; cursor: pointer; }
+  .primary:hover { background: var(--marker); }
+  .saved { font-weight: 600; color: var(--ok); }
+  .sumErr { color: var(--bad); font-weight: 600; }
+
+  /* waiting and gate */
+  .wait { padding: clamp(24px, 4vw, 40px); }
+  .wait h1 { font-size: clamp(24px, 3.2vw, 34px); max-width: 24ch; }
+  .wait p { max-width: 60ch; }
+  .todoList { padding-left: 20px; }
+  .todoList button { background: none; border: 0; padding: 0; color: var(--marker); text-decoration: underline; cursor: pointer; font-weight: 600; }
+
+  /* report */
+  .rep { display: grid; gap: 18px; }
+  .repHead { background: var(--ink); color: #fff; border-radius: 12px; padding: clamp(22px, 4vw, 42px); }
+  .repHead .minute { color: var(--yellow); }
+  .repHead h1 { font-size: clamp(28px, 4.2vw, 46px); max-width: 22ch; }
+  .repHead p { max-width: 64ch; margin: 14px 0 0; font-size: 17.5px; color: #e9e7e1; }
+  .repHead .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+  .kpi { background: rgba(255, 255, 255, .08); border-radius: 8px; padding: 12px 14px; min-width: 0; }
+  .kpi span { display: block; font-size: 13px; color: #cfccc4; font-weight: 600; }
+  .kpi b { display: block; font-family: var(--head); font-size: clamp(22px, 3vw, 32px); line-height: 1.1; margin-top: 4px; overflow-wrap: anywhere; }
+  @media (max-width: 760px) { .repHead .kpis { grid-template-columns: minmax(0, 1fr); } }
+  .sec { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(23, 24, 28, .06); }
+  .secHead { padding: 18px clamp(18px, 4vw, 36px); background: var(--pad); }
+  .secHead small { display: block; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .secHead h2 { font-size: clamp(22px, 2.8vw, 30px); }
+  .secBody { padding: 18px clamp(18px, 4vw, 36px) 24px; }
+  .secBody p { max-width: 68ch; margin: 0 0 12px; }
+  .fit { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  @media (max-width: 760px) { .fit { grid-template-columns: minmax(0, 1fr); } }
+  .pick { border: 2px solid var(--ink); border-radius: 10px; padding: 16px; }
+  .pick b { display: block; font-family: var(--head); font-size: 26px; line-height: 1.15; }
+  .bars { display: grid; gap: 10px; }
+  .bar { display: grid; grid-template-columns: minmax(0, 9em) minmax(0, 1fr) 2.5em; align-items: center; gap: 10px; font-size: 14.5px; font-weight: 600; }
+  .bar .track { display: block; height: 12px; background: #e6e2d8; border-radius: 6px; overflow: hidden; }
+  .bar .fill { display: block; height: 100%; background: var(--ink); border-radius: 6px; }
+  .bar.win .fill { background: var(--coral); box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .eq { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 15px; background: var(--wall); border-radius: 8px; padding: 12px 14px; overflow-wrap: anywhere; margin: 0 0 16px; }
+  .chain { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin-bottom: 16px; }
+  .chain.n5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  @media (max-width: 900px) { .chain, .chain.n5 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .tile { border-radius: 8px; padding: 12px; background: var(--wall); min-width: 0; position: relative; }
+  .tile.weak { box-shadow: inset 0 0 0 2px var(--bad); }
+  .tile small { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-2); }
+  .tile b { display: block; font-family: var(--head); font-size: 24px; line-height: 1.15; margin: 4px 0 2px; overflow-wrap: anywhere; }
+  .tile span { display: block; font-size: 13.5px; color: var(--ink-2); }
+  .tile em { display: block; font-style: normal; font-size: 13px; font-weight: 700; margin-top: 6px; }
+  .tile.weak em { color: var(--bad); }
+  .note { font-size: 14px; color: var(--ink-2); }
+  .gut { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; background: var(--wall); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-weight: 600; }
+  .weakList { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; counter-reset: w; }
+  .weakList li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; padding: 14px; counter-increment: w; }
+  .weakList li::before { content: counter(w); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--blue); font-family: var(--head); font-weight: 800; font-size: 20px; }
+  .weakList h3 { font-size: 19px; }
+  .weakList p { margin: 6px 0 0; }
+  .gain { font-weight: 700; }
+  .days { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 900px) { .days { grid-template-columns: minmax(0, 1fr); } }
+  .day { border-radius: 10px; padding: 14px; background: color-mix(in srgb, var(--c) 45%, #fff); border-top: 6px solid var(--c); min-width: 0; }
+  .day small { display: block; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+  .day h3 { font-size: 18px; margin: 4px 0 8px; }
+  .day ul { margin: 0; padding-left: 18px; font-size: 15px; }
+  .day li { margin-bottom: 6px; overflow-wrap: anywhere; }
+  .cta { background: var(--yellow); border-radius: 12px; padding: clamp(22px, 4vw, 40px); display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: center; }
+  @media (max-width: 760px) { .cta { grid-template-columns: minmax(0, 1fr); } }
+  .cta h2 { font-size: clamp(26px, 3.4vw, 38px); }
+  .cta p { margin: 12px 0 0; max-width: 56ch; }
+  .ctaBox { background: var(--card); border-radius: 10px; padding: 18px; }
+  .ctaBox .price { font-family: var(--head); font-weight: 800; font-size: 40px; line-height: 1; }
+  .ctaBox .when { font-weight: 600; margin: 6px 0 14px; }
+  .ctaBox a { display: block; text-align: center; background: var(--ink); color: #fff; text-decoration: none; font-weight: 700; border-radius: 8px; padding: 14px 16px; }
+  .ctaBox a:hover { background: var(--marker); }
+  .ctaBox .carry { font-size: 14px; color: var(--ink-2); margin-top: 10px; }
+
+  /* host bar: simulates the admin centre's Live Companion control */
+  .host { position: fixed; left: 0; right: 0; bottom: 0; background: var(--ink); color: #fff; z-index: 10; box-shadow: 0 -6px 20px rgba(0, 0, 0, .15); }
+  .hostIn { max-width: 1100px; margin: 0 auto; padding: 10px clamp(12px, 4vw, 40px); display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; }
+  .hostTag { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--yellow); }
+  .hostNow { font-weight: 600; font-size: 15px; flex: 1 1 220px; min-width: 0; }
+  .hostBtns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hostBtns button { border: 0; border-radius: 6px; padding: 8px 12px; font-weight: 700; cursor: pointer; background: #34363d; color: #fff; }
+  .hostBtns button.go { background: var(--yellow); color: var(--ink); }
+  .hostBtns button[disabled] { opacity: .4; cursor: not-allowed; }
+  @media print { .host, .rail, .top .live, .ahead { display: none; } body { padding: 0; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">Tantra<small>Live Companion</small></div>
+  <div class="live" id="liveLine"><span class="dot" aria-hidden="true"></span><span id="liveText">Live now</span></div>
+</header>
+<nav class="rail" id="rail" aria-label="Segments"></nav>
+<div class="ahead" id="ahead" hidden></div>
+<main id="main" aria-live="polite"></main>
+
+<div class="host" id="host" role="region" aria-label="Host controls (prototype)">
+  <div class="hostIn">
+    <span class="hostTag">Host view</span>
+    <span class="hostNow" id="hostNow"></span>
+    <div class="hostBtns">
+      <button type="button" id="hostPrev">Back</button>
+      <button type="button" id="hostNext" class="go">Open next segment</button>
+      <button type="button" id="hostReset" title="Clear the session and every answer">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/*
+ * Live Companion prototype (T-430). Two roles on one page:
+ *  - the host bar at the bottom stands in for the admin centre: it writes the live segment;
+ *  - the attendee view polls that state once a second (production: GET /live/<session>/state every 4 s)
+ *    and follows the host. Attendees can go back to any opened segment, never ahead of the host.
+ * Storage stands in for the Worker: lc-host = { seg, at }, lc-answers = { fieldId: value }, lc-done = { segIndex: at }.
+ * Field ids match the onboarding centre cards (app/src/lib/workshop-cards.ts), so answers carry in on purchase.
+ */
+
+// ---------- the funnel model (simplified from workshop-plan/build/eqmodel.js + funnel-equations.json) ----------
+// Defaults are the model's own tile values for each shape with its example inputs; "good" and "low" are the
+// tile values with every input at the good or weak end of its typical range. Monthly customers = visitors x rates.
+const EXAMPLE_VISITORS = 3835;
+const SHAPES = {
+  webinar: { label: "Webinar funnel", short: "webinar", stages: [
+    { id: "rr", st: 2, name: "Registration Rate", ab: "RR", makes: "registrants", def: 0.094, good: 0.268, low: 0.041, field: "rate_reg",
+      fix: "Your page loses people before the form. Day 2 rebuilds the page, the form and the thank you page action." },
+    { id: "su", st: 3, name: "Show-Up Rate", ab: "SUR", makes: "attendees", def: 0.299, good: 0.785, low: 0.162, field: "rate_show",
+      fix: "Registrants forget. Day 2 builds the reminders by email, WhatsApp and SMS, and the add to calendar step." },
+    { id: "br", st: 4, name: "Booking Rate", ab: "BR", makes: "booked calls", def: 0.075, good: 0.172, low: 0.024, field: "lc_rate_book",
+      fix: "The pitch lands at the wrong minute, or nobody follows up. Day 2 writes the run of show and the close chain after it." },
+    { id: "cl", st: 5, name: "Close Rate", ab: "CR", makes: "customers", def: 0.172, good: 0.433, low: 0.031, field: "rate_purchase",
+      fix: "Calls with the wrong people, and no-shows nobody chases. Day 2 adds qualifying questions to the booking page and the no-show follow-up." },
+  ] },
+  challenge: { label: "Workshop or challenge funnel", short: "workshop", stages: [
+    { id: "rr", st: 2, name: "Registration Rate", ab: "RR", makes: "registrants", def: 0.094, good: 0.268, low: 0.041, field: "rate_reg",
+      fix: "Your page loses people before the form. Day 2 rebuilds the page, the form and the thank you page action." },
+    { id: "qd", st: 3, name: "1.5-Day Rate", ab: "DHR", makes: "people still in on day two", def: 0.179, good: 0.588, low: 0.081, field: "rate_show",
+      fix: "People join day one and vanish. Day 2 builds the day one reminders and the homework that pulls them into day two." },
+    { id: "bq", st: 4, name: "Booking Rate", ab: "BR", makes: "booked calls", def: 0.226, good: 0.352, low: 0.136, field: "lc_rate_book",
+      fix: "The offer arrives before they have felt a win. Day 2 places the offer after the first result and builds the close chain." },
+    { id: "cl", st: 5, name: "Close Rate", ab: "CR", makes: "customers", def: 0.172, good: 0.433, low: 0.031, field: "rate_purchase",
+      fix: "Calls with the wrong people, and no-shows nobody chases. Day 2 adds qualifying questions to the booking page and the no-show follow-up." },
+  ] },
+  rsp: { label: "Reverse squeeze funnel", short: "reverse squeeze", stages: [
+    { id: "hw", st: 2, name: "Half-Watch Rate", ab: "HWR", makes: "people who watch half the video", def: 0.107, good: 0.252, low: 0.068, field: "lc_rate_watch",
+      fix: "Visitors leave in the first minute. Day 2 rewrites the video's opening and adds the early exit opt-in so you can bring them back." },
+    { id: "br_h", st: 4, name: "Booking Rate", ab: "BR", makes: "booked calls", def: 0.027, good: 0.086, low: 0.0045, field: "lc_rate_book",
+      fix: "The booking link sits where nobody sees it. Day 2 puts it under the video and builds the follow-up for people who watched but did not book." },
+    { id: "cl", st: 5, name: "Close Rate", ab: "CR", makes: "customers", def: 0.172, good: 0.433, low: 0.031, field: "rate_purchase",
+      fix: "Calls with the wrong people, and no-shows nobody chases. Day 2 adds qualifying questions to the booking page and the no-show follow-up." },
+  ] },
+};
+const YEARLY = { name: "Yearly Rebooking Rate", ab: "YRR", def: 0.031 };
+
+// ---------- funnel fit: a port of recommend() in app/src/lib/guides/mechanism.ts ----------
+const REASON = {
+  webinar: "It is the best first funnel for any B2B business: one live session pitches to many and shows you which message lands.",
+  rsp: "You already know which message works. One video sales letter gives value, proves it and sells, without you on camera every week.",
+  challenge: "Your customers must do the work to feel the value. A live workshop series gets them doing it, and buying when they feel the first win.",
+};
+function recommend(a) {
+  const s = { webinar: 0, rsp: 0, challenge: 0 }, why = { webinar: [], rsp: [], challenge: [] };
+  const add = (m, n, q) => { s[m] += n; if (n > 0) why[m].push([n, q]); };
+  if (a.d1v5_funnel === "Webinar funnel") add("webinar", 3, null);
+  if (a.d1v5_funnel === "Workshop or challenge funnel") add("challenge", 3, null);
+  if (a.d1v5_funnel === "Reverse squeeze funnel") add("rsp", 3, null);
+  if (a.d1_proven && a.d1_proven.startsWith("Yes")) add("rsp", 2, a.d1_proven);
+  if (a.d1_proven && a.d1_proven.startsWith("Not")) { add("webinar", 2, a.d1_proven); s.rsp -= 3; }
+  if ((a.d1_biz && a.d1_biz.startsWith("Yes")) || a.biz_type === "Course or training business") add("challenge", 3, a.d1_biz || a.biz_type);
+  if (a.d1_belief === "They know me, but need one idea reframed") add("webinar", 2, a.d1_belief);
+  if (a.d1_belief === "They need a new way of working, and to try it") add("challenge", 2, a.d1_belief);
+  if (a.d1_belief === "Nobody has heard of me yet") add("rsp", 2, a.d1_belief);
+  if (a.d1_rung === "Entry") add("challenge", 1, a.d1_rung);
+  if (a.d1_rung === "Core" || a.d1_rung === "Flagship") add("webinar", 1, a.d1_rung);
+  if (a.d1_closer === "A person, on a booked call") { add("webinar", 1, a.d1_closer); add("rsp", 1, a.d1_closer); }
+  if (a.d1_closer === "A page takes the payment") add("challenge", 1, a.d1_closer);
+  if (a.d1_hours === "Under 8 hours") add("rsp", 2, a.d1_hours);
+  if (a.d1_hours === "8 to 12 hours") add("webinar", 1, a.d1_hours);
+  if (a.d1_hours === "More than 12 hours") add("challenge", 1, a.d1_hours);
+  const pick = ["webinar", "challenge", "rsp"].reduce((b, m) => (s[m] > s[b] ? m : b), "webinar");
+  const deciding = why[pick].filter((w) => w[1]).sort((x, y) => y[0] - x[0])[0];
+  return { pick, scores: s, deciding: deciding ? deciding[1] : null };
+}
+const PICKED = { "Webinar funnel": "webinar", "Workshop or challenge funnel": "challenge", "Reverse squeeze funnel": "rsp" };
+
+// ---------- the six segments, in run of show order ----------
+const PADS = ["var(--yellow)", "var(--coral)", "var(--blue)", "var(--green)", "var(--yellow)", "var(--coral)", "var(--blue)"];
+const SEGMENTS = [
+  { key: "business", tab: "Business", minute: "Minutes 0 to 8 · while I show you the leaky funnel",
+    title: "Tell Me About Your Business, So Your Report Is About You",
+    intro: "Ever read a funnel report and thought: that's not my business? Not today. Answer in your own words. Numbers beat adjectives.",
+    fields: [
+      { id: "name", label: "Your first name", type: "text", half: true, min: 1, max: 60, auto: "given-name" },
+      { id: "email", label: "Your work email", type: "email", half: true, hint: "Your report goes here, and into your workshop seat if you join.", auto: "email" },
+      { id: "biz_type", label: "Which is closest to your business?", type: "single", two: true, options: ["B2B software", "Consultancy or agency", "Course or training business", "Solo expert or freelancer"] },
+      { id: "biz_brand", label: "Your brand name, as buyers see it", type: "text", half: true, min: 1 },
+      { id: "biz_sells", label: "What you sell, and the price", type: "text", half: true, min: 6, placeholder: "The product or service · the price" },
+      { id: "biz_result", label: "Your best customer result, with a number", type: "textarea", min: 6, digit: true,
+        placeholder: "\"Took Northwind from 4 to 19 booked demos a month in 10 weeks\"", digitMsg: "Add the number: \"from 4 to 19 demos a month\", not \"lots more demos\"." },
+    ] },
+  { key: "offer", tab: "Offer", minute: "Minutes 8 to 20 · while I tell you how we build offers",
+    title: "Can a Stranger Repeat Your Offer Back to You?",
+    intro: "Most offers I see fail that test. Fill the five parts below and watch them turn into one sentence. That sentence goes on every page we build.",
+    fields: [
+      { id: "off_who", label: "Who: your buyer, named narrowly", type: "text", min: 3, placeholder: "\"Founders of B2B software companies with 10 to 50 staff\"" },
+      { id: "off_before", label: "Before: where they are stuck today", type: "text", half: true, min: 2 },
+      { id: "off_after", label: "After: the outcome, as a number", type: "text", half: true, min: 2, digit: true, placeholder: "\"10 booked calls a month\"",
+        digitMsg: "Make the outcome a number: \"10 booked calls a month\"." },
+      { id: "off_mechanism", label: "Mechanism: your method, by name", type: "text", half: true, min: 2 },
+      { id: "off_time", label: "Time: how long until they see it", type: "text", half: true, min: 1, placeholder: "\"90 days\"" },
+      { id: "d1_rung", label: "Where this offer sits on your ladder", type: "single", options: ["Entry", "Core", "Flagship"], inline: true },
+      { type: "preview" },
+    ] },
+  { key: "buyer", tab: "Buyer", minute: "Minutes 20 to 26 · Stages 1 and 2 of the framework",
+    title: "Who Exactly Signs the Cheque?",
+    intro: "\"SMBs\" is not a buyer. \"The head of sales at a 40 person software company\" is. Be that specific and every email we write later gets easier.",
+    fields: [
+      { id: "p_role", label: "Role and seniority: someone who can say yes alone", type: "text", half: true, min: 2 },
+      { id: "p_headcount", label: "Company headcount band", type: "text", half: true, min: 2, digit: true, placeholder: "\"11 to 50 employees\", not \"SMB\"",
+        digitMsg: "Give a band with numbers: \"11 to 50 employees\"." },
+      { id: "p_industry", label: "Industry (one to three)", type: "text", half: true, min: 1 },
+      { id: "d1_trigger", label: "The trigger: what makes it urgent this quarter", type: "text", half: true, min: 4, placeholder: "Funding, a new hire, a launch, a rule change" },
+      { id: "p_challenge", label: "Their challenge: what blocks their number right now, in their words", type: "textarea", min: 3 },
+    ] },
+  { key: "funnel", tab: "Funnel", minute: "Minutes 26 to 38 · the three funnel shapes",
+    title: "Which Funnel Fits Your Business?",
+    intro: "Here's the thing: the right funnel depends on what your buyers already believe, not on what you sell. Answer five questions and I'll show you which shape your answers point to.",
+    fields: [
+      { id: "d1_proven", label: "Do you already know which message wins buyers?", type: "single", two: true, options: ["Yes, and I have case studies that prove it", "Not yet, or I am new to building funnels"] },
+      { id: "d1_biz", label: "Must customers learn or do something before they feel the value?", type: "single", two: true, options: ["Yes: consulting with heavy knowledge transfer, training, edtech or a course", "No, they feel it soon after they buy"] },
+      { id: "d1_belief", label: "How much do your buyers already believe?", type: "single", options: ["They know me, but need one idea reframed", "They need a new way of working, and to try it", "Nobody has heard of me yet"] },
+      { id: "d1_closer", label: "Who closes the sale: a page, or a person?", type: "single", two: true, options: ["A page takes the payment", "A person, on a booked call"] },
+      { id: "d1_hours", label: "How many hours a week can you give it?", type: "single", options: ["Under 8 hours", "8 to 12 hours", "More than 12 hours"], inline: true },
+      { id: "d1v5_funnel", label: "Which funnel would you build?", type: "single", two: true, options: ["Webinar funnel", "Workshop or challenge funnel", "Reverse squeeze funnel", "Not sure yet: pick for me"] },
+      { type: "fitlive" },
+    ] },
+  { key: "numbers", tab: "Numbers", minute: "Minutes 38 to 50 · funnel math",
+    title: "How Many Customers Does Your Funnel Make Today?",
+    intro: "Have you ever doubled your traffic and watched sales stay flat? That's a leak further down. Give me your target and your price. The rates are optional: leave one blank and I use the typical number from my funnel model.",
+    fields: [
+      { id: "list_target", label: "Monthly revenue target", type: "number", half: true, pre: "$", min: 1, max: 100000000, placeholder: "50000" },
+      { id: "list_price", label: "Offer price", type: "number", half: true, pre: "$", min: 1, max: 10000000, placeholder: "4000" },
+      { id: "lc_visitors", label: "Visitors to your sign-up page in a month", type: "number", optional: true, min: 1, max: 10000000, int: true,
+        hint: "Not sure? Leave it blank and I use 3,835, the example month in my model." },
+      { type: "rates" },
+    ] },
+  { key: "leak", tab: "Your leak", minute: "Minutes 50 to 55 · getting started",
+    title: "Where Do You Think You're Leaking?",
+    intro: "Gut call first. Your report checks your gut against your numbers, and shows you which stage to fix first.",
+    fields: [
+      { id: "lc_leak", label: "Your biggest leak right now", type: "single", two: true, options: ["Not enough registrations", "Registrants don't show up", "People drop off before the pitch", "Few buyers, and no follow-up sales"] },
+      { id: "lc_channels", label: "Where your traffic comes from today (pick all that apply)", type: "multi", two: true, options: ["Cold email", "LinkedIn", "Calendar invites", "Paid ads", "Posts and content", "Referrals only", "None yet"] },
+      { id: "lc_blocker", label: "What has stopped you fixing it so far?", type: "textarea", min: 4 },
+    ] },
+];
+const REPORT_SEG = SEGMENTS.length; // host index 6 = reports open
+
+// ---------- state (stands in for the Worker) ----------
+const K = { host: "lc-host", ans: "lc-answers", done: "lc-done" };
+const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode */ } };
+let host = read(K.host, { seg: 0, at: Date.now() });
+let ans = read(K.ans, {});
+let done = read(K.done, {});
+let view = Math.min(host.seg, REPORT_SEG);
+let savedFlash = null;
+
+const esc = (t) => String(t == null ? "" : t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const words = (t) => String(t || "").trim().split(/\s+/).filter(Boolean).length;
+const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
+
+function shapeFor(a) {
+  const chosen = PICKED[a.d1v5_funnel];
+  return chosen || recommend(a).pick;
+}
+function rateFields(a) {
+  const shape = SHAPES[shapeFor(a)];
+  return shape.stages.map((s) => ({ id: s.field, label: s.name + ", %", type: "number", half: true, optional: true, post: "%", min: 0.01, max: 100,
+    placeholder: (s.def * 100).toFixed(1).replace(/\.0$/, ""), hint: "Blank uses " + pct(s.def) + ", the model's typical." }));
+}
+function fieldsOf(i, a) {
+  return SEGMENTS[i].fields.flatMap((f) => (f.type === "rates" ? rateFields(a) : f.id ? [f] : []));
+}
+
+// ---------- validation ----------
+function check(f, v) {
+  const val = Array.isArray(v) ? v : String(v == null ? "" : v).trim();
+  const empty = Array.isArray(val) ? !val.length : !val;
+  if (empty) return f.optional ? "" : (f.type === "single" || f.type === "multi" ? "Pick one to carry on." : "Fill this in to carry on.");
+  if (f.type === "email") return EMAIL.test(val) ? "" : "That email looks off. Check it, so your report reaches you.";
+  if (f.type === "number") {
+    const n = Number(val);
+    if (!isFinite(n)) return "Numbers only, no symbols or commas.";
+    if (f.int && Math.round(n) !== n) return "Use a whole number.";
+    if (n < f.min || n > f.max) return f.post === "%" ? "Use a rate between 0.01 and 100." : "Use a number from " + f.min.toLocaleString("en-US") + " to " + f.max.toLocaleString("en-US") + ".";
+    return "";
+  }
+  if (f.type === "multi") {
+    if (val.includes("None yet") && val.length > 1) return "\"None yet\" can't sit with another channel. Untick one.";
+    return "";
+  }
+  if (f.type === "single") return f.options.includes(val) ? "" : "Pick one to carry on.";
+  if (f.max && val.length > f.max) return "Keep it under " + f.max + " characters.";
+  if (f.min && words(val) < f.min) return f.min === 1 ? "Fill this in to carry on." : "Give me at least " + f.min + " words. Specific beats short.";
+  if (f.digit && !/\d/.test(val)) return f.digitMsg || "Add a number.";
+  return "";
+}
+function segErrors(i, a) {
+  const out = {};
+  fieldsOf(i, a).forEach((f) => { const e = check(f, a[f.id]); if (e) out[f.id] = e; });
+  return out;
+}
+
+// ---------- rendering: the rail ----------
+function renderRail() {
+  const rail = document.getElementById("rail");
+  rail.innerHTML = SEGMENTS.concat([{ tab: "Report" }]).map((s, i) => {
+    const open = i <= host.seg;
+    const cls = [i === view ? "on" : "", done[i] ? "done" : "", open && i < host.seg && i < REPORT_SEG && !done[i] ? "todo" : ""].join(" ");
+    return '<button type="button" class="pill ' + cls + '" style="--pad:' + PADS[i] + '" data-go="' + i + '"' + (open ? "" : " disabled") +
+      ' aria-current="' + (i === view ? "step" : "false") + '"><b>' + (i < REPORT_SEG ? i + 1 : "R") + '</b><span>' + esc(s.tab) + "</span></button>";
+  }).join("");
+}
+function renderAhead() {
+  const box = document.getElementById("ahead");
+  if (host.seg > view) {
+    const label = host.seg >= REPORT_SEG ? "Your report is open." : "I've moved on to " + (host.seg + 1) + ": " + SEGMENTS[host.seg].tab + ".";
+    box.innerHTML = "<div><span>" + label + "</span><button type=\"button\" data-go=\"" + host.seg + "\">Go there</button></div>";
+    box.hidden = false;
+  } else box.hidden = true;
+}
+
+// ---------- rendering: a segment ----------
+function fieldHtml(f) {
+  const v = ans[f.id];
+  const lab = esc(f.label) + (f.optional ? ' <span class="opt">(optional)</span>' : "");
+  const hint = f.hint ? '<span class="hint" id="h-' + f.id + '">' + esc(f.hint) + "</span>" : "";
+  const err = '<div class="err" id="e-' + f.id + '" role="alert"></div>';
+  const cls = "f" + (f.half ? " half" : "");
+  if (f.type === "single" || f.type === "multi") {
+    const kind = f.type === "single" ? "radio" : "checkbox";
+    const opts = f.options.map((o) => {
+      const on = f.type === "single" ? v === o : Array.isArray(v) && v.includes(o);
+      return '<label class="choice"><input type="' + kind + '" name="' + f.id + '" value="' + esc(o) + '"' + (on ? " checked" : "") + "><span>" + esc(o) + "</span></label>";
+    }).join("");
+    const cols = f.two ? " two" : "";
+    const style = f.inline ? ' style="grid-template-columns:repeat(' + f.options.length + ',minmax(0,1fr))"' : "";
+    return '<fieldset class="' + cls + '" data-f="' + f.id + '" style="border:0;padding:0;margin:0;min-width:0"><legend class="lab" style="padding:0;font-weight:700;font-size:15.5px;margin-bottom:6px">' + lab + "</legend>" + hint +
+      '<div class="choices' + cols + (f.inline ? " inl" : "") + '"' + style + ">" + opts + "</div>" + err + "</fieldset>";
+  }
+  const attrs = ' id="i-' + f.id + '" name="' + f.id + '" aria-describedby="e-' + f.id + (f.hint ? " h-" + f.id : "") + '"' +
+    (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : "") + (f.auto ? ' autocomplete="' + f.auto + '"' : "");
+  let input;
+  if (f.type === "textarea") input = "<textarea" + attrs + ">" + esc(v || "") + "</textarea>";
+  else if (f.type === "number") input = '<input type="number" inputmode="decimal" step="any"' + attrs + ' value="' + esc(v == null ? "" : v) + '">';
+  else input = '<input type="' + (f.type === "email" ? "email" : "text") + '"' + attrs + ' value="' + esc(v || "") + '">';
+  if (f.pre) input = '<div class="unit pre"><i>' + f.pre + "</i>" + input + "</div>";
+  if (f.post) input = '<div class="unit post">' + input + "<i>" + f.post + "</i></div>";
+  return '<div class="' + cls + '" data-f="' + f.id + '"><label for="i-' + f.id + '">' + lab + "</label>" + hint + input + err + "</div>";
+}
+function offerSentence(a) {
+  const g = (k, d) => esc((a[k] || "").trim() || d);
+  return "I help <b>" + g("off_who", "[who]") + "</b> go from <b>" + g("off_before", "[before]") + "</b> to <b>" + g("off_after", "[after]") +
+    "</b> using <b>" + g("off_mechanism", "[method]") + "</b>, in <b>" + g("off_time", "[time]") + "</b>.";
+}
+function fitLine(a) {
+  const ready = a.d1_belief && a.d1_closer && a.d1_hours;
+  if (!ready) return "Answer the belief, closer and hours questions and I'll show where your answers point.";
+  const r = recommend(Object.assign({}, a, { d1v5_funnel: null }));
+  return "Your answers point to: <b>" + SHAPES[r.pick].label + "</b>.";
+}
+function renderSegment(i) {
+  const s = SEGMENTS[i];
+  const body = s.fields.map((f) => {
+    if (f.type === "preview") return '<div class="preview" id="preview"><b>Your offer in one sentence</b><span>' + offerSentence(ans) + "</span></div>";
+    if (f.type === "fitlive") return '<div class="preview" id="fitlive"><b>Live read</b><span>' + fitLine(ans) + "</span></div>";
+    if (f.type === "rates") return rateFields(ans).map(fieldHtml).join("");
+    return fieldHtml(f);
+  }).join("");
+  const last = i === SEGMENTS.length - 1;
+  const btn = last ? "Save, then wait for your report" : "Save this page";
+  const flash = savedFlash === i ? '<span class="saved" role="status">Saved. I\'ll open the next page when I get there.</span>' : "";
+  return '<article class="card" style="--pad:' + PADS[i] + '"><div class="cardHead"><p class="minute">' + (i + 1) + " of " + SEGMENTS.length + " · " + esc(s.minute) + "</p><h1>" + esc(s.title) +
+    '</h1><p class="intro">' + esc(s.intro) + '</p></div><form class="cardBody" id="seg" data-seg="' + i + '" novalidate><div class="grid">' + body +
+    '</div><div class="actions"><button type="submit" class="primary">' + btn + '</button><span id="sumErr" class="sumErr" role="alert"></span>' + flash + "</div></form></article>";
+}
+
+// ---------- the report ----------
+const pct = (r) => { const p = r * 100; return (p >= 10 ? p.toFixed(1).replace(/\.0$/, "") : p >= 1 ? p.toFixed(1).replace(/\.0$/, "") : p.toFixed(2).replace(/0$/, "")) + "%"; };
+const num = (n) => (n >= 100 ? Math.round(n).toLocaleString("en-US") : n >= 10 ? (Math.round(n * 10) / 10).toLocaleString("en-US") : (Math.round(n * 10) / 10).toFixed(1));
+const money = (n) => "$" + Math.round(n).toLocaleString("en-US");
+function model(a) {
+  const key = shapeFor(a), shape = SHAPES[key];
+  const visitors = Number(a.lc_visitors) > 0 ? Number(a.lc_visitors) : EXAMPLE_VISITORS;
+  const rates = shape.stages.map((s) => { const n = Number(a[s.field]); return n > 0 ? n / 100 : s.def; });
+  const given = shape.stages.map((s) => Number(a[s.field]) > 0);
+  const counts = [visitors];
+  rates.forEach((r) => counts.push(counts[counts.length - 1] * r));
+  const customers = counts[counts.length - 1];
+  const price = Number(a.list_price), target = Number(a.list_target);
+  const revenue = customers * price;
+  const need = Math.ceil(target / price);
+  const through = rates.reduce((p, r) => p * r, 1);
+  const visitorsNeeded = Math.ceil(need / through);
+  const nonBuyers = counts[1] - customers;
+  const yearly = nonBuyers * YEARLY.def * rates[rates.length - 1];
+  // weakest stages: move one rate to the good end of its range, keep the rest, count the customers that adds
+  const lev = shape.stages.map((s, i) => ({ s, i, from: rates[i], gain: rates[i] < s.good ? customers * (s.good / rates[i] - 1) : 0 }))
+    .filter((x) => x.gain > 0).sort((x, y) => y.gain - x.gain);
+  let weakest = lev.slice(0, 3);
+  if (weakest.length < 3 && visitors < visitorsNeeded) weakest.push({ traffic: true, gain: need - customers });
+  return { key, shape, visitors, visitorsGiven: Number(a.lc_visitors) > 0, rates, given, counts, customers, price, target, revenue, need, visitorsNeeded, yearly, weakest };
+}
+const LEAK_STAGE = { "Not enough registrations": 2, "Registrants don't show up": 3, "People drop off before the pitch": 4, "Few buyers, and no follow-up sales": 5 };
+function nextCohort() {
+  // the workshop runs every week, Wednesday to Friday, 11:00 ET (weekly cohort schedule); next Wednesday from today
+  const d = new Date(); const add = (3 - d.getDay() + 7) % 7 || 7; const wed = new Date(d.getFullYear(), d.getMonth(), d.getDate() + add);
+  const fri = new Date(wed.getFullYear(), wed.getMonth(), wed.getDate() + 2);
+  const f = (x, o) => x.toLocaleDateString("en-US", o);
+  return { wed, label: f(wed, { weekday: "long", month: "long", day: "numeric" }) + " to " + f(fri, { weekday: "long", month: "long", day: "numeric" }) + ", 11:00 ET each day" };
+}
+function carried(a) { return Object.keys(a).filter((k) => !k.startsWith("lc_") && k !== "name" && a[k] !== "" && a[k] != null && a[k] !== "Not sure yet: pick for me").length; }
+
+function renderReport() {
+  const a = ans, m = model(a), fit = recommend(Object.assign({}, a, { d1v5_funnel: null }));
+  const brand = esc(a.biz_brand), name = esc(a.name);
+  const chosen = PICKED[a.d1v5_funnel];
+  const max = Math.max(1, ...Object.values(fit.scores));
+  const bars = ["webinar", "challenge", "rsp"].map((k) =>
+    '<div class="bar' + (k === fit.pick ? " win" : "") + '"><span>' + SHAPES[k].label.replace(" funnel", "") + '</span><span class="track"><span class="fill" style="width:' +
+    Math.max(4, (Math.max(0, fit.scores[k]) / max) * 100) + '%"></span></span><span>' + Math.max(0, fit.scores[k]) + "</span></div>").join("");
+  let fitText;
+  if (!chosen) fitText = "<p>You asked me to pick. I'd build the <b>" + SHAPES[fit.pick].label.toLowerCase() + "</b>. " + esc(REASON[fit.pick]) + "</p>";
+  else if (chosen === fit.pick) fitText = "<p>You picked the <b>" + SHAPES[chosen].label.toLowerCase() + "</b>, and your answers agree. " + esc(REASON[fit.pick]) + "</p>";
+  else fitText = "<p>You picked the <b>" + SHAPES[chosen].label.toLowerCase() + "</b>. Your answers point to the <b>" + SHAPES[fit.pick].label.toLowerCase() + "</b>. " + esc(REASON[fit.pick]) +
+    "</p><p>Your report runs the numbers for the funnel you picked. On Day 1 of the workshop we settle it in ten minutes, with your answers on screen.</p>";
+  if (fit.deciding) fitText += '<p class="note">The answer that decided it: "' + esc(fit.deciding) + '".</p>';
+
+  // equation line and chain
+  const st = m.shape.stages;
+  const eq = num(m.visitors) + " visitors" + st.map((s, i) => " × " + pct(m.rates[i])).join("") + " = " + num(m.customers) + " customers a month";
+  const weakIds = m.weakest.filter((w) => !w.traffic).map((w) => w.s.id);
+  const tiles = ['<div class="tile' + (m.weakest.some((w) => w.traffic) ? " weak" : "") + '"><small>Stage 1 · Traffic</small><b>' + num(m.visitors) + "</b><span>visitors a month</span><em>" + (m.visitorsGiven ? "Your number" : "Model example") + "</em></div>"]
+    .concat(st.map((s, i) => '<div class="tile' + (weakIds.includes(s.id) ? " weak" : "") + '"><small>Stage ' + s.st + " · " + s.ab + "</small><b>" + pct(m.rates[i]) + "</b><span>" + esc(s.name) +
+      ": " + num(m.counts[i + 1]) + " " + esc(s.makes) + "</span><em>" + (weakIds.includes(s.id) ? "Weak: fix #" + (weakIds.indexOf(s.id) + 1) : m.given[i] ? "Your rate" : "Model typical") + "</em></div>"))
+    .concat(['<div class="tile"><small>Stage 6 · ' + YEARLY.ab + "</small><b>+" + num(m.yearly) + "</b><span>customers a month later in the year, from people who did not buy now</span><em>Model typical</em></div>"]);
+
+  // gut versus numbers
+  const gutStage = LEAK_STAGE[a.lc_leak];
+  const top = m.weakest[0];
+  const topStage = top ? (top.traffic ? 1 : top.s.st) : null;
+  const topName = top ? (top.traffic ? "Traffic" : top.s.name) : "none";
+  const gut = '<div class="gut"><span>Your gut said: ' + esc(a.lc_leak) + ".</span><span>Your numbers say: " + esc(topName) + (gutStage === topStage ? ". You called it." : ".") + "</span></div>";
+
+  const weakHtml = m.weakest.length ? '<ol class="weakList">' + m.weakest.map((w) => {
+    if (w.traffic) return "<li><div><h3>Stage 1: Traffic</h3><p>Even with every rate fixed, " + num(m.visitors) + " visitors a month is short. At your rates you need <b>" + num(m.visitorsNeeded) +
+      "</b>.</p><p>Day 2 builds the outreach that sends them: calendar invites, cold email, LinkedIn and WhatsApp, each with daily limits that keep your domains safe.</p></div></li>";
+    return "<li><div><h3>Stage " + w.s.st + ": " + esc(w.s.name) + "</h3><p>" + pct(w.from) + " now. At " + pct(w.s.good) + ", the good end of its typical range, you add <span class=\"gain\">" +
+      num(w.gain) + " customers and " + money(w.gain * m.price) + " a month</span>.</p><p>" + esc(w.s.fix) + "</p></div></li>";
+  }).join("") + "</ol>" : "<p>Every rate you gave is already at the good end of its typical range. Your next lever is traffic.</p>";
+
+  // plan
+  const shapeName = m.shape.label.toLowerCase();
+  const fix1 = top ? (top.traffic ? "traffic" : top.s.name.toLowerCase()) : "your weakest stage";
+  const c = nextCohort();
+  const day = (col, tag, h, items) => '<div class="day" style="--c:' + col + '"><small>' + tag + "</small><h3>" + h + "</h3><ul>" + items.map((x) => "<li>" + x + "</li>").join("") + "</ul></div>";
+  const plan = day("var(--yellow)", "Before Day 1", "Get Set Up", ["Join the cohort group and add the three sessions to your calendar.", "Sign up for the tools your " + esc(m.shape.short) + " funnel needs."]) +
+    day("var(--coral)", "Day 1 · Wednesday", "Make the Decisions", ["Test your offer sentence on " + esc(a.p_role) + " and fix its weakest part.", "Lock the " + esc(shapeName) + " and the buyer: " + esc(a.p_headcount) + " in " + esc(a.p_industry) + ".", "Size the list: " + m.need + " customers a month means " + num(m.visitorsNeeded) + " visitors at your rates."]) +
+    day("var(--blue)", "Day 2 · Thursday", "Build Every Element", ["Every page, email, reminder and the close chain for your " + esc(m.shape.short) + " funnel.", "Fix #1 first: " + esc(fix1) + "."]) +
+    day("var(--green)", "Day 3 · Friday", "Put an Agent in Charge", ["Claude Code connects to every tool and runs three automations you have checked.", "Your dashboard tracks " + esc(fix1) + " every week, and you run one experiment on it."]);
+
+  const gap = m.target - m.revenue;
+  const lede = "You told me you want " + money(m.target) + " a month. At " + money(m.price) + " that's " + m.need + " customer" + (m.need === 1 ? "" : "s") + ". " +
+    (gap > 0 ? "Right now your funnel makes about " + num(m.customers) + " a month. Here's where the rest are leaking, and the three stages I'd fix first."
+      : "At these numbers your funnel already gets there. Here's how to make it hold, and the three stages with the most room.");
+
+  return '<div class="rep" id="report">' +
+    '<section class="repHead"><p class="minute">Your RevOps report · ' + brand + "</p><h1>" + name + ", Here's Where " + brand + " Is Losing Customers</h1><p>" + esc(lede) + "</p>" +
+    '<div class="kpis"><div class="kpi"><span>Customers a month now</span><b>' + num(m.customers) + '</b></div><div class="kpi"><span>Revenue a month now</span><b>' + money(m.revenue) +
+    '</b></div><div class="kpi"><span>Visitors you need for ' + money(m.target) + "</span><b>" + num(m.visitorsNeeded) + "</b></div></div></section>" +
+    '<section class="sec" style="--pad:var(--coral)"><div class="secHead"><small>1 · Funnel shape</small><h2>Which Funnel Fits ' + brand + '?</h2></div><div class="secBody"><div class="fit"><div><div class="pick"><span class="note">Your answers point to</span><b>' +
+    SHAPES[fit.pick].label + "</b></div>" + fitText + '</div><div class="bars" aria-label="Fit score per funnel">' + bars + "</div></div></div></section>" +
+    '<section class="sec" style="--pad:var(--yellow)"><div class="secHead"><small>2 · Your funnel math</small><h2>What Your ' + esc(m.shape.label.replace(" funnel", "")) + ' Funnel Makes Each Month</h2></div><div class="secBody"><p class="eq">' + esc(eq) + "</p>" +
+    '<div class="chain' + (tiles.length === 5 ? " n5" : "") + '">' + tiles.join("") + "</div>" +
+    "<p>That's " + money(m.revenue) + " a month against your " + money(m.target) + " target. " + (m.visitorsGiven ? "" : "I used 3,835 visitors, the example month in my model, because you left traffic blank. ") +
+    'At these rates you need <b>' + num(m.visitorsNeeded) + " visitors a month</b> to hit it.</p><p class=\"note\">This counts page visitors only. Registrants from calendar invites and replies to cold email and LinkedIn come on top, and Day 2 builds them.</p></div></section>" +
+    '<section class="sec" style="--pad:var(--blue)"><div class="secHead"><small>3 · Weakest stages</small><h2>The Three Stages Costing You the Most Customers</h2></div><div class="secBody">' + gut + weakHtml + "</div></section>" +
+    '<section class="sec" style="--pad:var(--green)"><div class="secHead"><small>4 · Your plan</small><h2>Your 3-Day Plan to Fix It</h2></div><div class="secBody"><div class="days">' + plan + "</div></div></section>" +
+    '<section class="cta"><div><h2>Want to Build This With Me This Week?</h2><p>For three days you build the ' + esc(shapeName) + ' this report describes: the pages, the emails, the reminders and the agent that runs them. I fix ' + esc(fix1) +
+    " with you first.</p><p>Every answer you gave tonight comes with you. You start Day 1 with " + carried(a) + ' answers already filled in.</p></div><div class="ctaBox"><div class="price">$99</div><div class="when">The 3-Day AI RevOps Workshop<br>' + esc(c.label) +
+    '</div><a href="/masterclass?lc=prototype" id="ctaLink">Save My Seat</a><p class="carry">Your report stays at this link. I also send it to ' + esc(a.email) + ".</p></div></section></div>";
+}
+
+function renderGate() {
+  const todo = SEGMENTS.map((s, i) => i).filter((i) => !done[i]);
+  if (!todo.length) return renderReport();
+  return '<article class="card" style="--pad:var(--blue)"><div class="wait"><p class="minute">Your report</p><h1>You\'re ' + todo.length + " Page" + (todo.length === 1 ? "" : "s") +
+    " Away From Your Report</h1><p>Your report runs on your answers, so it needs all six pages. Finish these and it builds itself:</p><ul class=\"todoList\">" +
+    todo.map((i) => '<li><button type="button" data-go="' + i + '">' + (i + 1) + ". " + esc(SEGMENTS[i].tab) + "</button></li>").join("") + "</ul></div></article>";
+}
+
+// ---------- drawing and events ----------
+function draw(focus) {
+  view = Math.min(view, host.seg);
+  const main = document.getElementById("main");
+  main.innerHTML = view >= REPORT_SEG ? renderGate() : renderSegment(view);
+  chrome();
+  if (focus) { const h = main.querySelector("h1"); if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); } window.scrollTo({ top: 0 }); }
+}
+// rail, banner and host bar only: never touches the form, so unsaved typing survives a host move
+function chrome() {
+  renderRail(); renderAhead();
+  document.getElementById("hostNow").textContent = host.seg >= REPORT_SEG ? "Reports are open for everyone." : "Live: " + (host.seg + 1) + " of " + SEGMENTS.length + ", " + SEGMENTS[host.seg].tab + ". Attendees following: 1";
+  document.getElementById("liveText").textContent = host.seg >= REPORT_SEG ? "Reports open" : "Live · " + (host.seg + 1) + " of " + SEGMENTS.length;
+  document.getElementById("hostPrev").disabled = host.seg <= 0;
+  document.getElementById("hostNext").disabled = host.seg >= REPORT_SEG;
+  document.getElementById("hostNext").textContent = host.seg === REPORT_SEG - 1 ? "Open the reports" : "Open next segment";
+}
+function collect(form) {
+  const seg = Number(form.dataset.seg);
+  fieldsOf(seg, ans).forEach((f) => {
+    if (f.type === "single") { const c = form.querySelector('input[name="' + f.id + '"]:checked'); ans[f.id] = c ? c.value : ""; }
+    else if (f.type === "multi") ans[f.id] = [...form.querySelectorAll('input[name="' + f.id + '"]:checked')].map((x) => x.value);
+    else { const el = form.querySelector('[name="' + f.id + '"]'); if (el) ans[f.id] = el.value.trim(); }
+  });
+}
+function showErr(form, id, msg) {
+  const box = form.querySelector('[data-f="' + id + '"]'); if (!box) return;
+  box.classList.toggle("bad", !!msg);
+  box.querySelector(".err").textContent = msg || "";
+  box.querySelectorAll("input, textarea").forEach((el) => el.setAttribute("aria-invalid", msg ? "true" : "false"));
+}
+document.addEventListener("click", (e) => {
+  const go = e.target.closest("[data-go]");
+  if (go && !go.disabled) { view = Number(go.dataset.go); savedFlash = null; draw(true); }
+});
+document.addEventListener("submit", (e) => {
+  const form = e.target.closest("#seg"); if (!form) return;
+  e.preventDefault();
+  collect(form);
+  const seg = Number(form.dataset.seg), errs = segErrors(seg, ans);
+  fieldsOf(seg, ans).forEach((f) => showErr(form, f.id, errs[f.id]));
+  write(K.ans, ans);
+  const n = Object.keys(errs).length;
+  if (n) {
+    form.querySelector("#sumErr").textContent = n === 1 ? "One answer needs a fix." : n + " answers need a fix.";
+    const first = form.querySelector(".f.bad input, .f.bad textarea"); if (first) first.focus();
+    delete done[seg]; write(K.done, done); renderRail();
+    return;
+  }
+  done[seg] = Date.now(); write(K.done, done);
+  // production: PUT /live/<session>/answers { seg, fields } with the attendee's live token
+  if (host.seg > seg) { view = Math.min(host.seg, seg + 1 <= host.seg ? seg + 1 : host.seg); savedFlash = null; draw(true); }
+  else { savedFlash = seg; draw(false); }
+});
+document.addEventListener("input", (e) => {
+  const form = e.target.closest("#seg"); if (!form) return;
+  const box = e.target.closest("[data-f]"); if (box && box.classList.contains("bad")) { collect(form); const f = fieldsOf(Number(form.dataset.seg), ans).find((x) => x.id === box.dataset.f); if (f) showErr(form, f.id, check(f, ans[f.id])); }
+  if (form.querySelector("#preview")) { collect(form); form.querySelector("#preview span").innerHTML = offerSentence(ans); }
+  if (form.querySelector("#fitlive")) { collect(form); form.querySelector("#fitlive span").innerHTML = fitLine(ans); }
+  if (savedFlash !== null) { savedFlash = null; const s = form.querySelector(".saved"); if (s) s.remove(); }
+});
+document.addEventListener("focusout", (e) => {
+  const form = e.target.closest && e.target.closest("#seg"); if (!form || !e.target.name) return;
+  const val = e.target.value; if (!val) return; // judge on blur only once something is typed
+  collect(form);
+  const f = fieldsOf(Number(form.dataset.seg), ans).find((x) => x.id === e.target.name);
+  if (f && f.type !== "single" && f.type !== "multi") showErr(form, f.id, check(f, ans[f.id]));
+});
+
+// host controls (production: the admin centre's Live Companion panel POSTs /admin/api/live/<session>/advance)
+function setHost(seg) { host = { seg: Math.max(0, Math.min(REPORT_SEG, seg)), at: Date.now() }; write(K.host, host); }
+function hostMoved() {
+  const waiting = view === prevHost && (done[view] || view >= REPORT_SEG);
+  if (waiting && host.seg > view) { view = host.seg; savedFlash = null; draw(true); }
+  else if (view > host.seg) draw(true);
+  else chrome();
+  prevHost = host.seg;
+}
+let prevHost = host.seg;
+document.getElementById("hostNext").addEventListener("click", () => { setHost(host.seg + 1); hostMoved(); });
+document.getElementById("hostPrev").addEventListener("click", () => { setHost(host.seg - 1); hostMoved(); });
+document.getElementById("hostReset").addEventListener("click", () => { ans = {}; done = {}; write(K.ans, ans); write(K.done, done); setHost(0); prevHost = 0; view = 0; savedFlash = null; draw(true); });
+if (new URLSearchParams(location.search).get("host") === "0") document.getElementById("host").hidden = true;
+
+// the attendee poll: follows the host when they were waiting on a finished page
+setInterval(() => {
+  const h = read(K.host, host);
+  if (h.at === host.at && h.seg === host.seg) return;
+  host = h; hostMoved();
+}, 1000);
+
+window.__lc = { SEGMENTS, SHAPES, recommend, model: () => model(ans), answers: () => ans, setHost: (n) => { setHost(n); hostMoved(); } };
+draw(false);
+</script>
+</body>
+</html>
